@@ -10,13 +10,16 @@ pub struct Executor {
 }
 
 impl Executor {
+
+    #[inline(always)]
     pub fn new() -> Self {
         Executor {
             tasks: Arc::new(Mutex::new(VecDeque::new())),
         }
     }
 
-    pub fn spawn(&self, task: impl Future<Output = ()> + Send + 'static) {
+    #[inline(always)]
+    pub fn block_on(&self, task: impl Future<Output = ()> + Send + 'static) {
         self.tasks.lock().unwrap().push_back(Box::pin(task));
     }
 
@@ -34,6 +37,7 @@ impl Executor {
     }
 }
 
+#[inline(always)]
 pub async fn hello_async() {
     println!("Hello from async runtime!");
 }
