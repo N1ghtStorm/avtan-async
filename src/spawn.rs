@@ -19,11 +19,11 @@ impl Executor {
     }
 
     #[inline(always)]
-    pub fn block_on(&self, task: impl Future<Output = ()> + Send + 'static) {
+    pub fn spawn(&self, task: impl Future<Output = ()> + Send + 'static) {
         self.tasks.lock().unwrap().push_back(Box::pin(task));
     }
 
-    pub fn run(&self) {
+    pub fn block_on(&self) {
         while let Some(mut task) = self.tasks.lock().unwrap().pop_front() {
             let waker = noop_waker();
             let mut context = Context::from_waker(&waker);
