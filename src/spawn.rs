@@ -1,10 +1,9 @@
+use futures::task::noop_waker;
+use std::collections::VecDeque;
 use std::future::Future;
 use std::pin::Pin;
-use std::task::{Context, Poll};
 use std::sync::{Arc, Mutex};
-use std::collections::VecDeque;
-use futures::task::noop_waker;
-
+use std::task::{Context, Poll};
 
 pub struct Executor {
     tasks: Arc<Mutex<VecDeque<Pin<Box<dyn Future<Output = ()> + Send>>>>>,
