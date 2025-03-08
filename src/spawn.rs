@@ -1,10 +1,10 @@
+use futures::task::ArcWake;
+use std::collections::{HashMap, VecDeque};
 use std::future::Future;
 use std::pin::Pin;
-use std::task::{Context, Poll, Waker};
 use std::sync::{Arc, Mutex};
-use std::collections::{VecDeque, HashMap};
+use std::task::{Context, Poll, Waker};
 use std::time::{Duration, Instant};
-use futures::task::ArcWake;
 
 // Task represents a future with its waker
 pub struct Task {
@@ -49,7 +49,9 @@ impl Executor {
             if wake_time <= Instant::now() {
                 self.ready_tasks.lock().unwrap().push_back(task);
             } else {
-                self.sleeping_tasks.lock().unwrap()
+                self.sleeping_tasks
+                    .lock()
+                    .unwrap()
                     .entry(wake_time)
                     .or_default()
                     .push(task);
@@ -75,10 +77,10 @@ impl Executor {
             // Wake up sleeping tasks
             let now = Instant::now();
             let mut ready = Vec::new();
-            
+
             let mut sleeping = self.sleeping_tasks.lock().unwrap();
             let wake_times: Vec<_> = sleeping.keys().cloned().collect();
-            
+
             for time in wake_times {
                 if time <= now {
                     if let Some(tasks) = sleeping.remove(&time) {
@@ -95,9 +97,9 @@ impl Executor {
             while let Some(task) = self.ready_tasks.lock().unwrap().pop_front() {
                 let waker = futures::task::waker_ref(&task);
                 let mut cx = Context::from_waker(&waker);
-                
+
                 let mut future = unsafe {
-                    // Safety: we only move the future temporarily and 
+                    // Safety: we only move the future temporarily and
                     // ensure it's moved back before the task is dropped
                     // let ptr = &task.future as *const _ as *mut _;
                     // &mut *ptr
@@ -114,8 +116,9 @@ impl Executor {
                 }
             }
 
-            if self.ready_tasks.lock().unwrap().is_empty() && 
-               self.sleeping_tasks.lock().unwrap().is_empty() {
+            if self.ready_tasks.lock().unwrap().is_empty()
+                && self.sleeping_tasks.lock().unwrap().is_empty()
+            {
                 break;
             }
         }
@@ -140,7 +143,10 @@ impl Future for Sleep {
                 wake_time: Some(self.deadline),
             });
             EXECUTOR.with(|e| {
-                e.borrow().sleeping_tasks.lock().unwrap()
+                e.borrow()
+                    .sleeping_tasks
+                    .lock()
+                    .unwrap()
                     .entry(self.deadline)
                     .or_default()
                     .push(task);
