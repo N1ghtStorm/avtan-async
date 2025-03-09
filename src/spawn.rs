@@ -94,27 +94,27 @@ impl Executor {
             self.ready_tasks.lock().unwrap().extend(ready);
 
             // Process ready tasks
-            while let Some(task) = self.ready_tasks.lock().unwrap().pop_front() {
-                let waker = futures::task::waker_ref(&task);
-                let mut cx = Context::from_waker(&waker);
+            // while let Some(task) = self.ready_tasks.lock().unwrap().pop_front() {
+            //     let waker = futures::task::waker_ref(&task);
+            //     let mut cx = Context::from_waker(&waker);
 
-                let mut future = unsafe {
-                    // Safety: we only move the future temporarily and
-                    // ensure it's moved back before the task is dropped
-                    // let ptr = &task.future as *const _ as *mut _;
-                    // &mut *ptr
-                    todo!()
-                };
+            //     let mut future = unsafe {
+            //         // Safety: we only move the future temporarily and
+            //         // ensure it's moved back before the task is dropped
+            //         // let ptr = &task.future as *const _ as *mut _;
+            //         // &mut *ptr
+            //         todo!()
+            //     };
 
-                match future.as_mut().poll(&mut cx) {
-                    Poll::Pending => {
-                        // Task will be woken up by its waker when ready
-                    }
-                    Poll::Ready(()) => {
-                        // Task is complete, it will be dropped
-                    }
-                }
-            }
+            //     match future.as_mut().poll(&mut cx) {
+            //         Poll::Pending => {
+            //             // Task will be woken up by its waker when ready
+            //         }
+            //         Poll::Ready(()) => {
+            //             // Task is complete, it will be dropped
+            //         }
+            //     }
+            // }
 
             if self.ready_tasks.lock().unwrap().is_empty()
                 && self.sleeping_tasks.lock().unwrap().is_empty()
