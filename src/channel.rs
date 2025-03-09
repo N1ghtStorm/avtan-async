@@ -1,6 +1,10 @@
 use std::collections::VecDeque;
 use std::sync::{Arc, Condvar, Mutex, atomic::{AtomicBool, Ordering}};
 
+pub enum ChannelError {
+    Closed,
+}
+
 pub struct MPMCChannel<T> {
     queue: Mutex<VecDeque<T>>,
     condvar: Condvar,
@@ -16,9 +20,9 @@ impl<T> MPMCChannel<T> {
         })
     }
 
-    pub fn send(&self, item: T) -> Result<(), T> {
+    pub fn send(&self, item: T) -> Result<(), ChannelError> {
         if self.closed.load(Ordering::SeqCst) {
-            return Err(item);
+            return Err(ChannelError::Closed);
         }
 
         let mut queue = self.queue.lock().unwrap();
