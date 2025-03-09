@@ -5,13 +5,14 @@ pub enum ChannelError {
     Closed,
 }
 
-pub struct MPMCChannel<T> {
+/// Avtan Channel
+pub struct AvtanaChannel<T> {
     queue: Mutex<VecDeque<T>>,
     condvar: Condvar,
     closed: AtomicBool,
 }
 
-impl<T> MPMCChannel<T> {
+impl<T> AvtanChannel<T> {
     pub fn new() -> Arc<Self> {
         Arc::new(Self {
             queue: Mutex::new(VecDeque::new()),
