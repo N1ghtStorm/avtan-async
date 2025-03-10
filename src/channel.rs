@@ -1,5 +1,8 @@
 use std::collections::VecDeque;
-use std::sync::{Arc, Condvar, Mutex, atomic::{AtomicBool, Ordering}};
+use std::sync::{
+    atomic::{AtomicBool, Ordering},
+    Arc, Condvar, Mutex,
+};
 
 pub enum ChannelError {
     Closed,
