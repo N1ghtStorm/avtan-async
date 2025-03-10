@@ -6,7 +6,7 @@ pub enum ChannelError {
 }
 
 /// Avtan Channel
-pub struct AvtanaChannel<T> {
+pub struct AvtanChannel<T> {
     queue: Mutex<VecDeque<T>>,
     condvar: Condvar,
     closed: AtomicBool,
