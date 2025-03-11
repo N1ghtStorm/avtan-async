@@ -55,3 +55,32 @@ impl<T> AvtanChannel<T> {
         self.condvar.notify_all();
     }
 }
+
+mod avtan_furure {
+    use std::{
+        future::Future,
+        pin::Pin,
+        task::{Context, Poll},
+        time::Duration,
+    };
+
+    pub struct AvtanFuture {
+        count: i32,
+    }
+
+    impl Future for AvtanFuture {
+        type Output = i32;
+
+        fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            self.count += 1;
+            println!("polling with result: {}", self.count);
+            std::thread::sleep(Duration::from_secs(1));
+            if self.count < 5 {
+                cx.waker().wake_by_ref();
+                Poll::Pending
+            } else {
+                Poll::Ready(self.count)
+            }
+        }
+    }
+}
