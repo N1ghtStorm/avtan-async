@@ -56,11 +56,12 @@ impl<T> AvtanChannel<T> {
     }
 }
 
-mod avtan_furure {
+pub mod avtan_furure {
     use std::{
         future::Future,
         pin::Pin,
-        task::{Context, Poll},
+        sync::{Arc, Mutex},
+        task::{Context, Poll, Waker},
         time::Duration,
     };
 
@@ -80,6 +81,44 @@ mod avtan_furure {
                 Poll::Pending
             } else {
                 Poll::Ready(self.count)
+            }
+        }
+    }
+
+    struct AvtanSharedFuture {
+        state: Arc<Mutex<MyFutureState>>,
+    }
+    struct MyFutureState {
+        data: Option<Vec<u8>>,
+        waker: Option<Waker>,
+    }
+
+    impl AvtanSharedFuture {
+        fn new() -> (Self, Arc<Mutex<MyFutureState>>) {
+            let state = Arc::new(Mutex::new(MyFutureState {
+                data: None,
+                waker: None,
+            }));
+            (
+                AvtanSharedFuture {
+                    state: state.clone(),
+                },
+                state,
+            )
+        }
+    }
+
+    impl Future for AvtanSharedFuture {
+        type Output = String;
+        fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            println!("Polling the future");
+            let mut state = self.state.lock().unwrap();
+            if state.data.is_some() {
+                let data = state.data.take().unwrap();
+                Poll::Ready(String::from_utf8(data).unwrap())
+            } else {
+                state.waker = Some(cx.waker().clone());
+                Poll::Pending
             }
         }
     }
