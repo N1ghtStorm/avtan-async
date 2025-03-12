@@ -55,11 +55,11 @@ impl Drop for ThreadPool {
     fn drop(&mut self) {
         // Drop the sender to signal workers to terminate
         drop(self.sender.take());
-        
+
         // Wait for all workers to finish
         for worker in &mut self.workers {
             println!("Shutting down worker {}", worker.id);
-            
+
             if let Some(thread) = worker.thread.take() {
                 thread.join().unwrap();
             }

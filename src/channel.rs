@@ -55,5 +55,3 @@ impl<T> AvtanChannel<T> {
         self.condvar.notify_all();
     }
 }
-
-
