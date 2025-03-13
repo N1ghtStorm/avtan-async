@@ -5,11 +5,11 @@ all: build
 
 # Build the library
 build:
-	cargo build --release
+	cargo build -r
 
 # Run tests
 test:
-	cargo test
+	cargo test -r
 
 # Clean build artifacts
 clean:
