@@ -54,4 +54,3 @@ impl<'a, T> DerefMut for MutexGuard<'a, T> {
         unsafe { &mut *self.mutex.data.get() }
     }
 }
-
