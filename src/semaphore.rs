@@ -46,3 +46,33 @@ impl Semaphore {
         self.condvar.notify_one();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::sync::Arc;
+    use std::thread;
+
+    #[test]
+    fn test_semaphore() {
+        let semaphore = Arc::new(Semaphore::new(2));
+        let mut handles = vec![];
+
+        for i in 0..5 {
+            let sem = Arc::clone(&semaphore);
+            let handle = thread::spawn(move || {
+                sem.acquire();
+                println!("Thread {} acquired a permit", i);
+                // Simulate some work
+                thread::sleep(std::time::Duration::from_millis(100));
+                println!("Thread {} releasing a permit", i);
+                sem.release();
+            });
+            handles.push(handle);
+        }
+
+        for handle in handles {
+            handle.join().unwrap();
+        }
+    }
+}
