@@ -1,12 +1,14 @@
 use std::cell::UnsafeCell;
 use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
+use crate::semaphore::Semaphore;
+
 
 /// A simple asynchronous mutex implementation.
 pub struct Mutex<T> {
     /// The semaphore is used to control access to the data.
     /// With permit_count = 1, it acts as a mutex.
-    // semaphore: Arc<Semaphore>,
+    semaphore: Arc<Semaphore>,
     /// The protected data.
     data: UnsafeCell<T>,
 }
@@ -14,6 +16,7 @@ pub struct Mutex<T> {
 /// Guard that provides safe access to the locked data and releases the lock when dropped.
 pub struct MutexGuard<'a, T> {
     mutex: &'a Mutex<T>,
+    // _permit: SemaphorePermit<'a>,
 }
 
 // Mutex implementation
@@ -21,14 +24,16 @@ impl<T> Mutex<T> {
     /// Creates a new async mutex with the given data.
     pub fn new(data: T) -> Self {
         Self {
-            // semaphore: Arc::new(Semaphore::new(1)), // Only one permit available
+            semaphore: Arc::new(Semaphore::new(1)), // Only one permit available
             data: UnsafeCell::new(data),
         }
     }
 
     /// Acquires the lock, waiting asynchronously if necessary.
     pub async fn lock(&self) -> MutexGuard<'_, T> {
-        // let permit = self.semaphore.acquire().await.unwrap();
+        // TODO Make async
+        let permit = self.semaphore.acquire();
+        // .await.unwrap();
         MutexGuard {
             mutex: self,
             // _permit: permit,
